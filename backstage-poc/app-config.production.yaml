@@ -1,7 +1,6 @@
 app:
   # Should be the same as backend.baseUrl when using the `app-backend` plugin.
   baseUrl: http://localhost:7007
-
 backend:
   # Note that the baseUrl should be the URL that the browser and other clients
   # should use when communicating with the backend, i.e. it needs to be
@@ -12,7 +11,10 @@ backend:
   # The listener can also be expressed as a single <host>:<port> string. In this case we bind to
   # all interfaces, the most permissive setting. The right value depends on your specific deployment.
   listen: ':7007'
-
+  # Required for auth (signing cookies/tokens). Set BACKEND_SECRET when running in Docker/production.
+  auth:
+    keys:
+      - secret: ${BACKEND_SECRET}
   # config options: https://node-postgres.com/apis/client
   database:
     client: pg
@@ -27,11 +29,20 @@ backend:
       # ssl:
       #   ca: # if you have a CA file and want to verify it you can uncomment this section
       #     $file: <file-path>/ca/server.crt
-
 auth:
+  environment: production
   providers:
-    guest: {}
-
+    # Allow guest sign-in when running in Docker (e.g. yarn docker:up).
+    # Only for local/demo use; use a real auth provider in production.
+    guest:
+      dangerouslyAllowOutsideDevelopment: true
+    github:
+      production:
+        clientId: ${GITHUB_CLIENT_ID}
+        clientSecret: ${GITHUB_CLIENT_SECRET}
+        signIn:
+          resolvers:
+            - resolver: usernameMatchingUserEntityName
 catalog:
   # Overrides the default list locations from app-config.yaml as these contain example data.
   # See https://backstage.io/docs/features/software-catalog/#adding-components-to-the-catalog for more details
@@ -41,13 +52,11 @@ catalog:
     # File locations are relative to the backend process, typically in a deployed context, such as in a Docker container, this will be the root
     - type: file
       target: ./examples/entities.yaml
-
     # Local example template
     - type: file
       target: ./examples/template/template.yaml
       rules:
         - allow: [Template]
-
     # Local example organizational data
     - type: file
       target: ./examples/org.yaml
