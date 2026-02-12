@@ -1,0 +1,37 @@
+# Run Backstage with a PostgreSQL database for local Docker tryout.
+# Build the image first: yarn docker:build
+# Then: yarn docker:up   (or docker compose up)
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: backstage
+      POSTGRES_PASSWORD: backstage
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U backstage"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backstage:
+    image: backstage
+    ports:
+      - "7007:7007"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: backstage
+      POSTGRES_PASSWORD: backstage
+      # Required for auth; backend uses this to sign cookies/session tokens (avoid 401)
+      BACKEND_SECRET: backstage-docker-dev-secret-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
