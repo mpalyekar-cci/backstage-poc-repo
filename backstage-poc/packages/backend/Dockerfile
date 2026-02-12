@@ -24,6 +24,10 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get install -y --no-install-recommends python3 g++ build-essential && \
     rm -rf /var/lib/apt/lists/*
 
+# Remove npm (not used; we use yarn at build and only node at runtime).
+# Also removes vulnerable @isaacs/brace-expansion bundled with npm.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+
 # From here on we use the least-privileged `node` user to run the backend.
 USER node
 
