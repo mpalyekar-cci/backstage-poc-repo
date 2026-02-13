@@ -29,6 +29,13 @@ services:
       POSTGRES_PASSWORD: backstage
       # Required for auth; backend uses this to sign cookies/session tokens (avoid 401)
       BACKEND_SECRET: backstage-docker-dev-secret-change-in-production
+      # Required for GitHub OAuth (Sign in with GitHub). Set in .env or pass when running docker compose up.
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      # Required for GitHub catalog location (private repo). Set in .env or: docker compose run -e GITHUB_TOKEN=ghp_xxx ...
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      # More catalog/URL logs: debug, info (default), warn, error
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     depends_on:
       postgres:
         condition: service_healthy

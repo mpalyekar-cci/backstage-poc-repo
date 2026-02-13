@@ -18,10 +18,12 @@ FROM node:24-trixie-slim
 ENV PYTHON=/usr/bin/python3
 
 # Install isolate-vm dependencies, these are needed by the @backstage/plugin-scaffolder-backend.
+# python3-pip and mkdocs-techdocs-core are required for TechDocs local generator (runIn: 'local').
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && \
-    apt-get install -y --no-install-recommends python3 g++ build-essential && \
+    apt-get install -y --no-install-recommends python3 python3-pip g++ build-essential && \
+    pip install --no-cache-dir --break-system-packages mkdocs-techdocs-core && \
     rm -rf /var/lib/apt/lists/*
 
 # Remove npm (not used; we use yarn at build and only node at runtime).

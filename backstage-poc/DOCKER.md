@@ -71,6 +71,14 @@ yarn docker:up
 
 Then open **http://localhost:7007**. Stop with `Ctrl+C` or run `yarn docker:down`.
 
+**GitHub sign-in:** For “Sign in with GitHub” to work in Docker, pass the same OAuth credentials you use for `yarn start`. Either:
+
+- Create a `.env` file next to `docker-compose.yml` with:
+  - `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` (from your [GitHub OAuth App](https://github.com/settings/developers))
+- Or run: `GITHUB_CLIENT_ID=... GITHUB_CLIENT_SECRET=... yarn docker:up`
+
+The **Authorization callback URL** in your GitHub OAuth App must match the Docker app URL, e.g. `http://localhost:7007/api/auth/github/handler/frame` (and `http://localhost:7007` as Homepage URL if required). With `yarn start` the frontend is on port 3000 but the auth callback still goes to the backend (7007), so the same callback URL works for both.
+
 ### Option B: Run image alone (you must provide Postgres)
 
 ```bash
@@ -96,6 +104,8 @@ For production, pass Postgres and a strong `BACKEND_SECRET` (and any other env v
 ## Troubleshooting
 
 - **401 Unauthorized from the frontend:** The backend needs `BACKEND_SECRET` to sign auth cookies/tokens. Use Docker Compose (`yarn docker:up`), or pass `-e BACKEND_SECRET=your-secret` when running the image alone.
+
+- **GitHub sign-in fails in Docker but works with `yarn start`:** Ensure `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` are passed into the container (e.g. via a `.env` file next to `docker-compose.yml` or `-e` when using `docker run`). In Docker Compose they are read from the host environment. Also confirm your GitHub OAuth App’s callback URL is `http://localhost:7007/api/auth/github/handler/frame` (or your actual backend base URL).
 
 - **More verbose build output:**  
   `docker image build . -f packages/backend/Dockerfile --tag backstage --progress=plain`
